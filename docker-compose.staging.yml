@@ -1,0 +1,128 @@
+services:
+  api:
+    image: ${DOCKERHUB_USERNAME:?DOCKERHUB_USERNAME is required}/FlowUp-api:${DOCKER_TAG:-latest}
+    container_name: FlowUp-api-staging
+    build:
+      context: .
+      target: staging
+      dockerfile: staging.Dockerfile
+    ports:
+      - '${PORT:-8080}:${PORT:-8080}'
+    environment:
+      - NODE_ENV=staging
+      - PORT=${PORT:-8080}
+      - DO_DB_HOST=${DO_DB_HOST:-db}
+      - DO_DB_PORT=${DO_DB_PORT:-5432}
+      - DO_DB_USER=${DO_DB_USER:-postgres}
+      - DO_DB_PASSWORD=${DO_DB_PASSWORD:-postgres}
+      - DO_DB_NAME=${DO_DB_NAME:-FlowUp}
+      - DO_DB_CA_CERT=${DO_DB_CA_CERT}
+      - PRODUCT=${PRODUCT:-FlowUp}
+      - JWT_SECRET=${JWT_SECRET:-your_secure_jwt_secret_here}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-3600s}
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-your-email@gmail.com}
+      - SMTP_PASS=${SMTP_PASS:-your-app-specific-password}
+      - SMTP_FROM=${SMTP_FROM:-your-email@gmail.com}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - SENDGRID_FROM_EMAIL=${SENDGRID_FROM_EMAIL}
+      - SENDGRID_SMTP_HOST=${SENDGRID_SMTP_HOST}
+      - SENDGRID_SMTP_PORT=${SENDGRID_SMTP_PORT}
+      - SENDGRID_SMTP_SECURE=${SENDGRID_SMTP_SECURE}
+      - SENDGRID_SMTP_USER=${SENDGRID_SMTP_USER}
+      - SENDGRID_SMTP_PASS=${SENDGRID_SMTP_PASS}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_SMS_FROM=${TWILIO_SMS_FROM}
+      - TWILIO_SENDER_ID=${TWILIO_SENDER_ID}
+      - TWILIO_WHATSAPP_NUMBER=${TWILIO_WHATSAPP_NUMBER}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-your-google-client-id}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-your-google-client-secret}
+      - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL:-https://api.stg.yourpassjo.com/api/auth/google/callback}
+      - APPLE_CLIENT_ID=${APPLE_CLIENT_ID:-your-apple-client-id}
+      - APPLE_TEAM_ID=${APPLE_TEAM_ID:-your-apple-team-id}
+      - APPLE_KEY_ID=${APPLE_KEY_ID:-your-apple-key-id}
+      - APPLE_PRIVATE_KEY=${APPLE_PRIVATE_KEY:-your-apple-private-key}
+      - APPLE_PRIVATE_KEY_PATH=${APPLE_PRIVATE_KEY_PATH:-/app/secrets/apple-key.p8}
+      - APPLE_CALLBACK_URL=${APPLE_CALLBACK_URL:-https://api.stg.yourpassjo.com/api/auth/apple/callback}
+      - GOOGLE_ANALYTICS_CLIENT_EMAIL=${GOOGLE_ANALYTICS_CLIENT_EMAIL:-your-ga-client-email}
+      - GOOGLE_ANALYTICS_PRIVATE_KEY=${GOOGLE_ANALYTICS_PRIVATE_KEY:-your-ga-private-key}
+      - GA_MEASUREMENT_ID=${GA_MEASUREMENT_ID:-your-ga-measurement-id}
+      - GA_API_SECRET=${GA_API_SECRET:-your-ga-api-secret}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID:-your-firebase-project-id}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL:-your-firebase-client-email}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY:-your-firebase-private-key}
+      - DB_RETRY_ATTEMPTS=10
+      - DB_RETRY_DELAY=5000
+      - TYPEORM_RETRY_ATTEMPTS=10
+      - TYPEORM_RETRY_DELAY=5000
+      - TYPEORM_CONNECTION_TIMEOUT=30000
+      - TYPEORM_ACQUIRE_TIMEOUT=30000
+      - TYPEORM_EXTRA_MAX_CONNECTIONS=20
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - LOG_TIMESTAMP=true
+      - LOG_COLOR=false
+    volumes:
+      - ./secrets:/usr/src/app/secrets:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    restart: unless-stopped
+    command: ['node', 'dist/main.js']
+
+  db:
+    image: postgres:latest
+    container_name: FlowUp-db-staging
+    ports:
+      - '5433:5432'
+    environment:
+      - POSTGRES_USER=${DO_DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DO_DB_PASSWORD:-postgres}
+      - POSTGRES_DB=${DO_DB_NAME:-FlowUp}
+      - POSTGRES_SSL=true
+      - POSTGRES_SSL_CA=/var/lib/postgresql/certs/ca-certificate.crt
+      - POSTGRES_MAX_CONNECTIONS=200
+      - POSTGRES_SHARED_BUFFERS=256MB
+      - POSTGRES_EFFECTIVE_CACHE_SIZE=768MB
+      - POSTGRES_MAINTENANCE_WORK_MEM=64MB
+      - POSTGRES_CHECKPOINT_COMPLETION_TARGET=0.9
+      - POSTGRES_WAL_BUFFERS=16MB
+      - POSTGRES_DEFAULT_STATISTICS_TARGET=100
+      - POSTGRES_RANDOM_PAGE_COST=1.1
+      - POSTGRES_EFFECTIVE_IO_CONCURRENCY=200
+      - POSTGRES_WORK_MEM=4MB
+      - POSTGRES_MIN_WAL_SIZE=1GB
+      - POSTGRES_MAX_WAL_SIZE=4GB
+      - POSTGRES_LOG_STATEMENT=all
+      - POSTGRES_LOG_DISCONNECTIONS=on
+      - POSTGRES_LOG_DURATION=on
+      - 'POSTGRES_LOG_LINE_PREFIX=%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h'
+    volumes:
+      - postgres_data_staging:/var/lib/postgresql/data
+      - ./secrets:/var/lib/postgresql/certs:ro
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${DO_DB_USER:-postgres} && pg_stat_activity | grep -q "idle in transaction" || true',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+volumes:
+  postgres_data_staging:
