@@ -1,0 +1,33 @@
+ # Version control
+.git
+.gitignore
+
+# Dependencies
+node_modules
+npm-debug.log
+
+# Build output
+dist
+build
+
+# Environment files
+.env
+.env.*
+
+# IDE files
+.idea
+.vscode
+
+# Test files
+coverage
+.nyc_output
+
+# Docker files
+staging.Dockerfile
+docker-compose.yml
+.dockerignore
+
+# OS files
+.DS_Store
+*.swp
+*.swo
