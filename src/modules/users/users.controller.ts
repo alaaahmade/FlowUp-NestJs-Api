@@ -31,6 +31,7 @@ import {
 } from '@nestjs/swagger';
 import { RoleGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Public } from '../auth/decorators/public.decorator';
 
 // Custom Request Interfaces
 export interface CustomRoute {
@@ -48,6 +49,7 @@ interface CustomError {
 
 @ApiTags('Users')
 @ApiBearerAuth()
+@Public()
 @UseGuards(JwtAuthGuard, RoleGuard)
 @Controller('users')
 export class UsersController {

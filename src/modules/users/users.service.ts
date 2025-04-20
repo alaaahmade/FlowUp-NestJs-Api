@@ -40,9 +40,10 @@ export class UsersService {
   }
 
   async findCustomers(): Promise<MobileUser[]> {
+    console.log('findCustomers', 1111111);
+
     const customers = await this.MobileUserRepository.find({
       relations: [
-        'roles',
         'bookings',
         'interests',
         'bookings.class',
