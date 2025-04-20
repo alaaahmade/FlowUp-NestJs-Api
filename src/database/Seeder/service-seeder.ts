@@ -119,7 +119,7 @@ async function seedServices() {
         vendor: vendorUser,
         credits: 30,
         images: [
-          'https://stgs3yourpass.fra1.digitaloceanspaces.com/stgs3yourpass/service/Padel%20FlowUp%20Reservation.jpeg',
+          'https://parksports.co.uk/media/images/New-23-24-Update/_2400xAUTO_crop_center-center_none_ns/Park-Sports-Adult-Padel-Courses.jpg',
         ],
         category: serviceCategories[1].name,
         categoryRelation: serviceCategories[1].id,
