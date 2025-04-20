@@ -62,6 +62,7 @@ interface AppleUser {
 }
 
 @ApiTags('Auth') // Swagger: Group all authentication routes under "Auth"
+@Public()
 @Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
