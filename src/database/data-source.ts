@@ -53,6 +53,9 @@ export const AppDataSource = new DataSource({
   database: process.env.DO_DB_NAME || 'FlowUp',
   synchronize: true,
   logging: false,
+  ssl: {
+    rejectUnauthorized: false, // ⚠️ Only use this in development
+  },
   entities: [
     User,
     Role,
@@ -78,7 +81,6 @@ export const AppDataSource = new DataSource({
   ],
   migrations: [],
   subscribers: [],
-  ssl: sslConfig,
 });
 
 // Only for development/debugging

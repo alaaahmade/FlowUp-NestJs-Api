@@ -36,6 +36,9 @@ export const databaseConfig = (): TypeOrmModuleOptions => {
     username: process.env.DO_DB_USER || 'postgres',
     password: process.env.DO_DB_PASSWORD || 'postgres',
     database: process.env.DO_DB_NAME || 'FlowUpFlowUp',
+    ssl: {
+      rejectUnauthorized: false, // ⚠️ Only use this in development
+    },
     entities: [
       User,
       Role,
@@ -63,7 +66,6 @@ export const databaseConfig = (): TypeOrmModuleOptions => {
     ],
 
     synchronize: true,
-    ssl: sslConfig,
     logging: ['error', 'warn', 'migration'],
     // logging: true,
   };
