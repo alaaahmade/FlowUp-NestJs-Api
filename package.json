@@ -10,7 +10,7 @@
     "seed": "ts-node src/database/Seeder/role-permissions.ts && npm run data-seed",
     "data-seed": " ts-node src/database/Seeder/customer-seeder.ts && ts-node src/database/Seeder/service-seeder.ts && ts-node src/database/Seeder/interests-seeder.ts && ts-node src/database/Seeder/advertisements-seeder.ts && ts-node src/database/Seeder/subscriptions-seeder.ts && ts-node src/database/Seeder/rating-and-reviews-seeder.ts",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "node --max-old-space-size=1024 dist/main",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
